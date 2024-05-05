@@ -5,10 +5,10 @@
 using namespace std ; 
 
 //Function Prototypes
- bool expressionevaluation(vector<char>variables , vector<int>values ,vector<char> result); 
- void insertvalues(vector<char>& v, vector<char>& variables, vector<int>& values);
- vector<char> infixtopostfix(string str);
- bool valid(string &str);
+ bool expressionevaluation(vector<string>result); 
+ void insertvalues(string& v, vector<char>& variables, vector<int>& values);
+ vector <string> infixtopostfix(vector<string> valid_string);
+ bool valid(string &str , vector<string>& valid_string);
  bool isoperator(char ch);
  bool isnum(char ch) ;
  //function to calculate power
@@ -24,10 +24,12 @@ using namespace std ;
 //function to display menu
 int main()
 {
-    
+    cout<<isnum('a')<<endl;
     int choice ;
     do{
-    vector<char> variables , postfix_expression;
+    vector<char> variables;
+    vector<string> valid_string ;
+    vector<string>  postfix_expression ;
     vector<int> values ;
     string str;
     cout << endl << "Expression conversion and evaluation Tool " << endl ;
@@ -43,7 +45,7 @@ int main()
                       cout << endl <<  "Enter Infix expression to evaluate: ";
                       while (true) {
                          cin >> str;
-                          if (valid(str)) {
+                          if (valid(str , valid_string)) {
                               break;
                           } else {
                               cout <<  endl  <<  "Enter a valid Expression: ";
@@ -59,23 +61,20 @@ int main()
         }
         if(choice != 2)
         {
-            cout << endl << "INFIX Expression : " << str << endl;
-            postfix_expression = infixtopostfix(str) ;
-            cout << endl << "     ---- Inserting values of variables ----" << endl ;
-            Sleep(1000);
-            insertvalue :
-            insertvalues(postfix_expression , variables , values) ;
+            cout << endl << "INFIX Expression : "  << endl;
+            for(string a : valid_string)
+            {
+                cout<<a <<" ";
+            }
+            postfix_expression = infixtopostfix(valid_string) ;
+           
             cout << endl << "     ---- Evaluating Expression ----" << endl ;
             Sleep(1000);
-            if(expressionevaluation(variables , values , postfix_expression) )
+            if(expressionevaluation(postfix_expression) )
             {
                 cout << endl << "     ---- Expression Evaluated Successfully ----" << endl ;
             }
-            else 
-            {
-                cout << endl << "     ---- Expression Evaluation Failed ----" << endl ;
-                goto insertvalue ;
-            }
+            
                 
         }
     }
@@ -87,7 +86,7 @@ int main()
 
 //function to check if a character is an alphabet
 bool isnum(char ch) {
-    return (ch >= '1' && ch <= '9');
+    return (ch >= '0' && ch <= '9');
 }
 //function to check if a character is an operator
 bool isoperator(char ch) {
@@ -96,16 +95,24 @@ bool isoperator(char ch) {
 
 
 //function to check if a string is a valid expression
-bool valid(string &str) 
+bool valid(string &str , vector<string>& valid_string) 
 {
-    if( ( (!isnum(str[0])) && str[0] != '(' ) || ( (!isnum(str[str.length()-1])) && str[str.length()-1] != ')' ))
+    if( ( !(isnum(str[0])) && str[0] != '(' ) || ( !(isnum(str[str.length()-1])) && str[str.length()-1] != ')' ))
     {
         cout <<  endl  <<  "Expression should start and end with valid variables";
-        return false;
+       return false;
     }
-    for(int i = 0; i < str.length() - 1; i++)
+    for(int i = 0; i < str.length(); i++)
     {
+        cout<<"step : "<<i<<endl;
+        int temp = i ;
         while(isnum(str[i])) i++; 
+        string t; 
+        valid_string.push_back(str.substr(temp , i-temp)); 
+        t.append(1,str[i]) ;
+        valid_string.push_back(t) ;
+        cout <<"operator :"<<t<<endl;
+        cout<<"string : "<<temp<<i<<"  "  <<str.substr(temp , i-temp) ;
         if ( isoperator(str[i]) && isoperator(str[i+1]))
         {
             cout << "At location " << i+1 << " " << i+2 << " " << str[i] << " and " << str[i+1] << " are not valid";
@@ -116,52 +123,69 @@ bool valid(string &str)
             cout << endl << "There is a operator behind ')'";
             return false ;
         }
-        if(isnum( str[i-1] ) && str[i] == '('  || ( isnum(str[i-1]) && isnum(str[i]) ) || (isnum( str[i+1] ) && str[i] == ')'  ))
+        if(isnum( str[i-1] ) && str[i] == '(' )
         {
-            string st = "*";
-            str.insert(i+1 , st );
+            string st = valid_string.back();
+            valid_string.pop_back();
+            valid_string.push_back("*");
+            valid_string.push_back(st);
         }
-        if(str[i] == '/' && str[i+1] == 0)
+        if( (isnum( str[i+1] ) && str[i] == ')'  ))
+        {
+            valid_string.push_back("*");
+        }
+        if(str[i] == '/' && str[i+1] == '0')
         {
             cout << endl << "There is a division by zero";
             return false ;
         }
     }
+    cout<<"success"<<endl;
     return true;
 }
 
 
 //function to convert infix to postfix expression
-vector<char> infixtopostfix(string str)
+vector <string> infixtopostfix(vector<string> str)
 {
-    vector<char> stack , postfixexpression ;
-    str[str.length()]  = ')';
-    stack.push_back('(');
+    cout<<"Infix to Postfix conversion"<<endl;
+    vector<string> stack  ;
+    vector<string>  postfixexpression ;
+    str.pop_back();
+    str.push_back(")");
+    stack.push_back("(");
 
-    for(int i = 0 ; i <= str.length() ; i++)
+    for(int i = 0 ; i < str.size() ; i++)
     {
-        cout << endl << endl << "Incoming : " << str[i] ;
+        cout << endl << endl << "Incoming : " << str[i][0] ;
 
         Sleep(800);
 
-        if(isnum(str[i]))
+        if(isnum(str[i][0]))
         {
+            int j = 0 ;
+            string temp ;
+            while(j<=str[i].size()) 
+            {
+                temp.push_back(str[i][j]);
+                j++ ;
+            }
             postfixexpression.push_back(str[i]);
         }
-        else if(isoperator(str[i]))
+        else if(isoperator(str[i][0]))
         {
-            if(str[i] == '^')
+            if(str[i] == "^")
             {
-                while(stack.back() == '^')
+                while(stack.back() == "^")
                 {
                     postfixexpression.push_back(stack.back());
                     stack.pop_back();
                 }
                 stack.push_back(str[i]);
             }
-            else if(str[i] == '*' || str[i] == '/')
+            else if(str[i] ==  "*" || str[i] == "/")
             {
-                while(stack.back() == '*' || stack.back() == '/')
+                while(stack.back() == "*" || stack.back() == "/")
                 {
                     postfixexpression.push_back(stack.back());
                     stack.pop_back();
@@ -170,20 +194,20 @@ vector<char> infixtopostfix(string str)
             }
             else
             {
-                while(isoperator( stack.back() ) )
+                while(isoperator( stack.back()[0] ) )
                 {
                     postfixexpression.push_back( stack.back() );
                     stack.pop_back();
                 }
-                stack.push_back( str[i] );
+                stack.push_back( str[i]);
             }
         }
-        else if( str[i] == '(' )
+        else if( str[i] == "(" )
         {
-            stack.push_back( '(' );
+            stack.push_back( "(" );
         }
         else{
-            while( stack.back() != '(' )
+            while( stack.back() != "(" )
             {
                 postfixexpression.push_back( stack.back() );
                 stack.pop_back();
@@ -199,7 +223,7 @@ vector<char> infixtopostfix(string str)
         else{
             for(int j = stack.size()-1 ; j >= 0 ; j--)
         {
-            printf("\n      |  %c  |",stack[j]);
+            printf("\n      |  %s  |",stack[j]);
             Sleep(300);
         }
         cout<< endl <<"      ```````";
@@ -219,30 +243,9 @@ vector<char> infixtopostfix(string str)
 }
 
 
-//function to Take Values as input from user
-void insertvalues(vector<char>& v, vector<char>& variables, vector<int>& values){
-    variables.clear();
-    values.clear();
-    for (char ch : v) {
-        bool found = false;
-        for (char var : variables) {
-            if (var == ch) {
-                found = true;
-                break;
-            }
-        }
-        if (!found && isnum(ch)) {
-            variables.push_back(ch);
-            cout << endl << "Enter value of " << ch << " : ";
-            int value;
-            cin >> value;
-            values.push_back(value);
-        }
-    }
-}
 
 //function to evaluate the postfix expression
-bool expressionevaluation(vector<char>variables , vector<int>values ,vector<char> result)
+bool expressionevaluation(vector<string>result)
 {
     int finalresult , second_last , last ;
     vector<int> stack ;
@@ -252,16 +255,9 @@ bool expressionevaluation(vector<char>variables , vector<int>values ,vector<char
         
         cout << endl << endl << "Incoming : " << result[i] ;
             Sleep(1000);
-        if( isnum(result[i]) )
+        if( isnum(result[i][0]) )
         {
-            for(int j = 0 ; j < variables.size() ; j++)
-            {
-                if(result[i] == variables[j])
-                {
-                    stack.push_back(values[j]);
-                    break ;
-                }
-            }
+            stack.push_back(stoi(result[i]));
             cout << endl  <<  stack.back()  << " Pushed onto stack" << endl;
         }
         else
@@ -271,7 +267,7 @@ bool expressionevaluation(vector<char>variables , vector<int>values ,vector<char
             second_last = stack.back();
             stack.pop_back();
 
-            switch (result[i])
+            switch (result[i][0])
             {
             case '+' : stack.push_back( second_last + last );
                 break;
