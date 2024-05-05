@@ -24,13 +24,10 @@ using namespace std ;
 //function to display menu
 int main()
 {
-    cout<<isnum('a')<<endl;
     int choice ;
     do{
-    vector<char> variables;
     vector<string> valid_string ;
     vector<string>  postfix_expression ;
-    vector<int> values ;
     string str;
     cout << endl << "Expression conversion and evaluation Tool " << endl ;
     cout << endl <<endl<<"      1) Enter Expression " << endl << "      2) Exit";
@@ -66,6 +63,7 @@ int main()
             {
                 cout<<a <<" ";
             }
+            cout<< endl;
             postfix_expression = infixtopostfix(valid_string) ;
            
             cout << endl << "     ---- Evaluating Expression ----" << endl ;
@@ -223,7 +221,7 @@ vector <string> infixtopostfix(vector<string> str)
         else{
             for(int j = stack.size()-1 ; j >= 0 ; j--)
         {
-            printf("\n      |  %s  |",stack[j]);
+            cout<<endl<<"      |  "<<stack[j]<<"  |" ;
             Sleep(300);
         }
         cout<< endl <<"      ```````";
@@ -233,7 +231,7 @@ vector <string> infixtopostfix(vector<string> str)
         for(int j = 0 ; j < postfixexpression.size() ; j++)
         {
             Sleep(200);
-            cout << postfixexpression[j];
+            cout << postfixexpression[j]<<" ";
         }
         cout << endl;
         Sleep(400);
